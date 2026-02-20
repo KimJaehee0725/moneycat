@@ -1,6 +1,16 @@
 import Link from "next/link";
 
-export default function Home() {
+import { requireUserFromCookies } from "@/lib/auth";
+
+export default async function Home() {
+  let loggedInEmail: string | null = null;
+  try {
+    const user = await requireUserFromCookies();
+    loggedInEmail = user.email;
+  } catch {
+    loggedInEmail = null;
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-8">
       <main className="w-full max-w-4xl rounded-3xl bg-white p-8 shadow-lg ring-1 ring-slate-200 sm:p-12">
@@ -9,9 +19,12 @@ export default function Home() {
           커플 2인을 위한<br />
           공유 가계부
         </h1>
-        <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600">
-          아이폰에서 빠르게 입력하고, PC에서 월별 합계/예산/통계를 확인하는 자체 운영형 PWA입니다.
-        </p>
+        <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600">하비비!</p>
+        {loggedInEmail ? (
+          <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+            이미 로그인되어 있습니다 ({loggedInEmail}).
+          </p>
+        ) : null}
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
             href="/register"
