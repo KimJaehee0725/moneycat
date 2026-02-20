@@ -1,0 +1,17 @@
+{
+  "name": "Moneycat",
+  "short_name": "Moneycat",
+  "description": "커플이 함께 쓰는 공유 가계부",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f7fb",
+  "theme_color": "#0f172a",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}

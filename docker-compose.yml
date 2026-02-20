@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: moneycat-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-moneycat}
+      POSTGRES_USER: ${POSTGRES_USER:-moneycat}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-moneycat_local_password}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-moneycat} -d ${POSTGRES_DB:-moneycat}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: moneycat-web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-moneycat}:${POSTGRES_PASSWORD:-moneycat_local_password}@db:5432/${POSTGRES_DB:-moneycat}?schema=public
+      AUTH_SECRET: ${AUTH_SECRET}
+      AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME:-moneycat_session}
+      APP_TIMEZONE: ${APP_TIMEZONE:-Asia/Seoul}
+      APP_CURRENCY: ${APP_CURRENCY:-KRW}
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: moneycat-caddy
+    restart: unless-stopped
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:-:80}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  postgres-data:
+  caddy-data:
+  caddy-config:
